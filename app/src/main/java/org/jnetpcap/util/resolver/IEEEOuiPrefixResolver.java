@@ -331,7 +331,7 @@ public class IEEEOuiPrefixResolver extends AbstractResolver {
 		str = transform(str, more, "Technologies", "Tech");
 		str = transform(str, more, "Technology", "Tech");
 		str = transform(str, more, "Communication", "Com");
-		str = transform(str, more, "Network", "Net");
+		str = transform(str, more, "WirelessNetwork", "Net");
 		str = transform(str, more, "System", "Sys");
 		str = transform(str, more, "Information", "Info");
 		str = transform(str, more, "Industries", "Ind");

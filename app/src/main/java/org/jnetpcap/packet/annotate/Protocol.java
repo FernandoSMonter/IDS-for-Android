@@ -83,21 +83,21 @@ public @interface Protocol {
 		VOIP,
 
 		/**
-		 * Local Area Network family of protocols.
+		 * Local Area WirelessNetwork family of protocols.
 		 */
 		LAN,
 
 		/**
-		 * Metropolitan Area Network family of protocols.
+		 * Metropolitan Area WirelessNetwork family of protocols.
 		 */
 		MAN,
 
 		/**
-		 * Wide Area Network family of protocols.
+		 * Wide Area WirelessNetwork family of protocols.
 		 */
 		WAN,
 		/**
-		 * Storage Area Network family of protocols.
+		 * Storage Area WirelessNetwork family of protocols.
 		 */
 		SAN,
 

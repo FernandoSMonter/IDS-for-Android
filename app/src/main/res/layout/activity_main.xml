@@ -13,6 +13,44 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        android:id="@+id/textView" />
+
+    <RelativeLayout
+        android:layout_width="368dp"
+        android:layout_height="232dp"
+        tools:layout_editor_absoluteX="8dp"
+        tools:layout_editor_absoluteY="33dp">
+
+        <EditText
+            android:id="@+id/editText2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:ems="10"
+            android:inputType="textPersonName"
+            tools:text="Name" />
+
+        <Button
+            android:id="@+id/begin_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="17dp"
+            android:onClick="startTcpdump"
+            android:text="Start" />
+
+        <Button
+            android:id="@+id/stop_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/begin_button"
+            android:layout_alignStart="@+id/begin_button"
+            android:layout_centerVertical="true"
+            android:text="Stop"
+            android:visibility="invisible" />
+    </RelativeLayout>
 
 </android.support.constraint.ConstraintLayout>

@@ -43,7 +43,7 @@ import org.jnetpcap.util.checksum.Checksum;
 
 // TODO: Auto-generated Javadoc
 /**
- * IP version 4. Network layer internet protocol version 4. This is the main
+ * IP version 4. WirelessNetwork layer internet protocol version 4. This is the main
  * header file for Internet Protocol version 4. The header file defines various
  * accessor methods for reading directly out of the Ip4 data structure found
  * within the packet data buffer. The header is peered with the packet at
@@ -121,7 +121,7 @@ public class Ip4
 		BBN_RCC_MON("BBN RCC Monitoring", 10),
 
 		/** PUP [PUP][XEROX]. */
-		NVP_II("Network Voice Protocol", 11),
+		NVP_II("WirelessNetwork Voice Protocol", 11),
 
 		/** CBT [Ballardie]. */
 		PUP("PUP", 12),
@@ -180,8 +180,8 @@ public class Ip4
 		/** Bulk Data Transfer Protocol [RFC969][DDC1]. */
 		NETBLT("Bulk Data Transfer Protocol", 30),
 
-		/** MFE Network Services Protocol [MFENET][BCH2]. */
-		MFE_NSP("MFE Network Services Protocol", 31),
+		/** MFE WirelessNetwork Services Protocol [MFENET][BCH2]. */
+		MFE_NSP("MFE WirelessNetwork Services Protocol", 31),
 
 		/** MERIT Internodal Protocol [HWB]. */
 		MERIT_INP("MERIT Internodal Protocol", 32),

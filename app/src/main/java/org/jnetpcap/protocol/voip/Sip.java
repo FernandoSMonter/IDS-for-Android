@@ -38,7 +38,7 @@ import org.jnetpcap.protocol.JProtocol;
  * <p>
  * SIP was originally designed by Henning Schulzrinne and Mark Handley starting
  * in 1996. The latest version of the specification is RFC 3261 from the IETF
- * Network Working Group. In November 2000, SIP was accepted as a 3GPP signaling
+ * WirelessNetwork Working Group. In November 2000, SIP was accepted as a 3GPP signaling
  * protocol and permanent element of the IP Multimedia Subsystem (IMS)
  * architecture for IP-based streaming multimedia services in cellular systems.
  * </p>
