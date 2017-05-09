@@ -26,30 +26,93 @@ import java.util.Date;
  */
 
 public class Tcpdump extends Thread{
-
+    /**
+     * The path of arm tcpdump binary
+     */
     final String binaryPath = "./data/local/tcpdump";
+
+    /**
+     * Main thread activity
+     */
     Activity activity;
 
+    /**
+     * Su inputstream
+     */
     DataInputStream inputStream;
+
+    /**
+     * Su outputstream
+     */
     DataOutputStream outputStream;
 
+    /**
+     *
+     */
     Handler refreshRate;
 
-    Process su;
+    /**
+     * Su
+     */
+    Process su = null;
 
     Date time;
 
-    public Tcpdump(Activity activity ){
-        this.activity = activity;
-       //refreshRate = new Handler();
+    boolean connection;
+
+    public Tcpdump(Activity activity) {
+       this.activity = activity;
+
+      /*  boolean analyzing = true;
+
+        while ( analyzing ){
+            //Haciendo analisis
+            if( new Date().getTime() > time.getTime() + 15000 ){
+                // stopCapturing();
+
+                capture = new File("/sdcard/infpackets/capture.pcap");
+
+                //The capture has packets inside
+                if( capture.exists() && capture.length() > 0 ){
+                    //Executed once
+
+                    Log.e("Time", "11 seconds elapsed, starting analysis module");
+                    Log.e("Capture", "Capture size: " + capture.length());
+
+                    //makeCopy(capture, "analyze.pcap");
+
+                    Log.e("Analyze","Analyze.pcap replaced");
+                    *//*if( runCommand("cp /sdcard/infpackets/capture.pcap /sdcard/infpackets/analyze.pcap\n") )
+                        Log.e("Copied","File copied");
+                    else
+                        Log.e("Copied", "Error copying file");*//*
+
+                    //new Analyzer(activity, new Date().getTime()).start();
+                    analyzing = false;
+                    //closeShell();
+
+                }else{
+                    Log.e("Packet","Capture size: " + capture.length());
+                    // startCapturing();
+                    //No packet captured, wait for next capture update time
+
+                }
+                startCapturing();
+                Log.e("Refresh", "Refreshing pcap");
+            }
+        }
+
+        Log.e("Analyzis","Finished");*/
     }
 
     @Override
-    public void run() {
+    public void run(){
         File capture;
-
+        int copies = 0;
+        boolean activated = false;
+        this.connection = true;
+        Analyzer analyze = new Analyzer(this.activity);
         showToast("Empezando captura");
-        Log.e("Start", "Starting tcpdump");
 
         //Opens the shell with root
         this.openSuShell();
@@ -57,63 +120,62 @@ public class Tcpdump extends Thread{
         //Starts tcpdump
         this.startCapturing();
 
-        boolean analyzing = true;
-        Date now;
+        while( this.connection ){
 
-        Log.e("Analyzing","Analyzing...");
-
-        while ( analyzing ){
-            now = new Date();
-            if( now.getTime() > time.getTime() + 11000 ){
-              // stopCapturing();
+            if( new Date().getTime() > time.getTime() + 10000){
+              //closeShell();
 
                 capture = new File("/sdcard/infpackets/capture.pcap");
 
-                    //The capture has packets inside
-                if( capture.exists() && capture.length() > 0 ){
-                    Log.e("Time", "11 seconds elapsed, starting analysis module");
-                    Log.e("Capture", "Capture size: " + capture.length());
+
+                if( capture.exists() && capture.length() > 0){
+                    this.closeShell();
+                    killAll("./data/local/tcpdump");
                     makeCopy(capture, "analyze.pcap");
+                    Log.e("Copia", copies + "");
 
-                    Log.e("Analyze","Analyze.pcap replaced");
-                    /*if( runCommand("cp /sdcard/infpackets/capture.pcap /sdcard/infpackets/analyze.pcap\n") )
-                        Log.e("Copied","File copied");
-                    else
-                        Log.e("Copied", "Error copying file");*/
 
-                    //new Analyzer(activity, new Date().getTime()).start();
-                    //analyzing = false;
-                    //closeShell();
-                  //  startCapturing();
-                    time = new Date();
+                    analyze.analyze();
+
+                    Log.e("Analyze","Analisis terminado");
+                    capture.delete();
+
+                    this.openSuShell();
+                    this.startCapturing();
+                    this.time = new Date();
+
+                    copies++;
+
                 }else{
-                    Log.e("Packet","Capture size: " + capture.length());
-                   // startCapturing();
-                    //No packet captured, wait for next capture update time
-                    time = new Date();
+                    //makeCopy(capture, "analyze.pcap");
+                    Log.e("Captura", "Captura sin paquetes");
+                    this.time = new Date();
                 }
-            }
-        }
 
-        Log.e("Analyzis","Finished");
+            }
+
+        }
     }
 
     public void openSuShell(){
         try{
-            su = Runtime.getRuntime().exec("su");
-            inputStream = new DataInputStream(su.getInputStream());
-            outputStream = new DataOutputStream(su.getOutputStream());
+            this.su = Runtime.getRuntime().exec("su");
+            this.inputStream = new DataInputStream(su.getInputStream());
+            this.outputStream = new DataOutputStream(su.getOutputStream());
+
         }catch(IOException e){
             System.out.println(e.getStackTrace());
         }
     }
 
     public void closeShell(){
-        stopCapturing();
-        su.destroy();
-        su = null;
-        inputStream = null;
-        outputStream = null;
+        //stopCapturing();
+
+        this.su.destroy();
+        this.su = null;
+
+        this.inputStream = null;
+        this.outputStream = null;
     }
 
     public void makeCopy(File file, String copy){
@@ -149,9 +211,8 @@ public class Tcpdump extends Thread{
         try{
 
         this.time = new Date();
-        outputStream.writeBytes(this.binaryPath + " -G 10 tcp -w /sdcard/infpackets/capture.pcap\n");
-        //Starts getting packets from shell
-        //refreshRate.post(refreshOutput);
+        outputStream.writeBytes(this.binaryPath + " tcp -w /sdcard/infpackets/capture.pcap\n");
+            Log.e("Capture","Capturando...");
     }catch(IOException e){
         System.out.println(e.getStackTrace());
     }
@@ -195,33 +256,28 @@ public class Tcpdump extends Thread{
         Log.e("Stop","Tcpdump stopped");
     }
 
+    /**
+     * Android killall pseudo-command (within rooted env)
+     * @param
+     */
+    private void killAll(String name){
+        try {
+            Runtime.getRuntime().exec("su");
 
-    private Runnable refreshOutput = new Runnable() {
-        @Override
-        public void run() {
-            try {
-                if (inputStream.available() > 0) {
-                    byte[] buffer = new byte[4096];
-
-                    try {
-                        inputStream.read(buffer, 0, 4096);
-
-                        Log.e("Stream", new String(buffer));
-                        Log.e("Buff", buffer[0] + "");
-                    } catch (IOException e) {
-                        stopCapturing();
-                        return;
-                    }
-                }
-
-            } catch (IOException e) {
-                stopCapturing();
+            Process p = Runtime.getRuntime().exec("ps "+ name);
+            BufferedReader in = new BufferedReader(
+                    new InputStreamReader(p.getInputStream()));
+            String line = null;
+            int i=0;
+            while ((line = in.readLine()) != null) {
+                if(i>0)//ignore title
+                    Runtime.getRuntime().exec("kill " + line.replaceAll(" {2,}", " ").split(" ")[1]);
+                i+=1;
             }
-
-            refreshRate.postDelayed(refreshOutput, 100);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-    };
-
+    }
 
     public void showToast(String message){
         final String msg = message;

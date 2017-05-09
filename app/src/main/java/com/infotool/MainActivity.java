@@ -40,13 +40,13 @@ public class MainActivity extends AppCompatActivity {
      * @param v
      */
     public void startTcpdump(View v){
-        //Monitoring module Thread
+        v.setVisibility(View.INVISIBLE);
+        stopButton.setVisibility(View.VISIBLE);
+
+        //Monitoring module thread
         tcpdump = new Tcpdump(this);
         tcpdump.start();
 
-        //new Analyzer(this).start();
-        v.setVisibility(View.INVISIBLE);
-        stopButton.setVisibility(View.VISIBLE);
     }
 
     /**

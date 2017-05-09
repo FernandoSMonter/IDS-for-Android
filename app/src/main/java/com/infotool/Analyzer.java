@@ -10,17 +10,23 @@ import org.jnetpcap.PcapHeader;
 import org.jnetpcap.nio.JBuffer;
 import org.jnetpcap.nio.JMemory;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Date;
 
-public class Analyzer extends Thread{
+public class Analyzer{
 
     Pcap pcap;
     StringBuilder buffer;
     Activity activity;
 
-    long then;
+    Date then;
 
-    final String pcap_path = "/sdcard/Download/connection.pcap";
+    final String pcap_path = "/sdcard/infpackets/analyze.pcap";
+    final String capture_path = "/sdcard/infpackets/capture.pcap";
 
     boolean treat_string;
 
@@ -31,18 +37,22 @@ public class Analyzer extends Thread{
         buffer = new StringBuilder();
         opening_counter = 0;
 
-        //time in seconds sin Epoch
-        this.then = then / 1000;
+        //Time in milliseconds
+        this.then = new Date();
 
         this.activity = activity;
 
     }
 
-   @Override
-   public void run(){
+   public void analyze(){
+        File analyze = new File(pcap_path);
 
-       this.openPcapFile();
-       this.mainAnalysis();
+       if( this.openPcapFile() ){
+               this.mainAnalysis();
+               analyze.delete();
+       }else {
+           Log.e("Error","No file, monitor");
+       }
    }
 
     /* Checks if external storage is available to at least read */
@@ -81,60 +91,80 @@ public class Analyzer extends Thread{
      * Opens offline packet
      * @return
      */
-    private void openPcapFile(){
+    private boolean openPcapFile(){
+        boolean readed = false;
+
+        File analysis = new File(pcap_path);
+
         if(!isExternalStorageReadable()){
             showToast("Sin permisos w/r");
         }
 
-        pcap = Pcap.openOffline(pcap_path, buffer);
+        if(analysis.exists() && analysis.length() > 0){
+            pcap = Pcap.openOffline(pcap_path, buffer);
 
-        if (pcap == null) {
-            showToast("Error: " + buffer);
-        }else {
-            showToast("Pcap abierto con éxito: " + this.opening_counter++);
+            if (pcap == null) {
+                showToast("Error: " + buffer);
+                return false;
+            }else {
+                Log.e("Abiertos", opening_counter + "");
+                showToast("Pcap abierto con éxito: " + this.opening_counter++);
+                return true;
+            }
         }
+        return false;
     }
 
     /**
      * Runs main analysis
      */
     private void mainAnalysis(){
+        boolean analyzing = true;
+
+        int packet_umbral = 30;
 
         int threat_packet_counter = 0;
-        int packets_to_read = 100;
+        int packet_counter = 0;
+
+        byte []tcpHeader;
+
         boolean threatDetected = false;
 
         PcapHeader pcapHeader = new PcapHeader();
 
         JBuffer jbuffer = new JBuffer(JMemory.POINTER);
 
-        for (int i = 0; i < packets_to_read; i++){
-            Log.e("Paquete " , "" + (i + 1));
-            pcap.nextEx(pcapHeader, jbuffer);
+       while ( pcap.nextEx(pcapHeader, jbuffer) == Pcap.NEXT_EX_OK ){
+
+            Log.e("Paquete " , "" + (++packet_counter));
 
             //Gets tcpHeader bytes, always starting from the 35th byte
             //TCP size = 32 bytes
-            byte [] tcpHeader = jbuffer.getByteArray(34, 32);
+           if( jbuffer.size() >= 33 ){
+               tcpHeader = jbuffer.getByteArray(34, 32);
+           }else
+               continue;
 
             //IP size = 20 bytes
-            byte [] ipHeader  =  jbuffer.getByteArray(15, 20);
+            //byte [] ipHeader  =  jbuffer.getByteArray(15, 20);
 
             //Find the SYN-ACK packet
             if( flagsSynAck(tcpHeader) ){
                 //checkOptionsField(tcpHeader);
-                //Starts 2nd phase
 
+                //Starts 2nd phase
                 //Only checks tcps with ACK, looks for pattern
-                for (int j = i + 1; j < packets_to_read; j++){
-                    Log.e("Paquete ", "" + (j + 1));
-                    pcap.nextEx(pcapHeader, jbuffer);
+                while ( pcap.nextEx(pcapHeader, jbuffer) == Pcap.NEXT_EX_OK ){
+                    Log.e("Paquete ", "" + (++packet_counter));
 
                     //IP size = 20 bytes
-                    byte [] ipAckHeader  =  jbuffer.getByteArray(14, 33);
+                    //byte [] ipAckHeader  =  jbuffer.getByteArray(14, 33);
+                    if( jbuffer.size() >= 33 ){
+                        tcpHeader = jbuffer.getByteArray(34, 32);
+                    }else
+                    continue;
 
-                    byte [] tcpAckHeader = jbuffer.getByteArray(34, 32);
-
-                    if( flagsPshAck(tcpAckHeader) && checkHeaderLength(1514, pcapHeader)){
+                    if( flagsPshAck(tcpHeader) && checkHeaderLength(1514, pcapHeader)){
                         //getIP(ipAckHeader);
                         findString(jbuffer);        //Looks for suspicious strings in packet
                         threat_packet_counter++;    //Counts strange packet
@@ -142,10 +172,13 @@ public class Analyzer extends Thread{
 
                     if( threat_packet_counter >= 10){
                         Log.e("Pattern", "Ataque por Meterpreter detectado.");
-                        Log.e("Paquetes", "Paquetes analizados: " + (j + i +1));
-                        showNotification("Ataque por Meterpreter detectado.\nPaquetes analizados: " + (j + i + 1) +
+                        Log.e("Paquetes", "Paquetes analizados: " + packet_counter);
+                        showNotification("Ataque por Meterpreter detectado.\nPaquetes analizados: " + packet_counter +
                                          "\nIP y Puerto atacante" );
                         threatDetected = true;
+                        makeCopy(new File(pcap_path), "threat.pcap");
+                        break;
+                    }else if( packet_counter >= packet_umbral ){
                         break;
                     }
                 }
@@ -157,7 +190,7 @@ public class Analyzer extends Thread{
 
     /**
      * Verificacion de SYN ACK de paquetes
-     * @param byte
+     * @param
      * @return boolean
      */
     private boolean flagsSynAck(byte[] tcpHeader){
@@ -206,7 +239,7 @@ public class Analyzer extends Thread{
     }
 
     private boolean checkHeaderLength(int max, PcapHeader header){
-        if( max == header.caplen() ){
+        if(  header.caplen() >= max ){
             Log.e("TAM: ", header.caplen() + "");
             return true;
         }
@@ -232,5 +265,31 @@ public class Analyzer extends Thread{
 
         Log.e("IP", "Source: " + ipHeader[11]);
         Log.e("IP", "Destination: " + ipHeader[15] + "." + ipHeader[16] + "." + ipHeader[17] + "." + ipHeader[18]);
+    }
+
+    public void makeCopy(File file, String copy){
+        try{
+            FileInputStream in   = new FileInputStream(file);
+            FileOutputStream out = new FileOutputStream("/sdcard/infpackets/" + copy);
+
+            byte[] buffer = new byte[1024];
+            int read;
+
+            while( (read = in.read(buffer) ) != -1 ){
+                out.write(buffer, 0, read);
+            }
+
+            in.close();
+            in = null;
+
+            out.flush();
+            out.close();
+            out = null;
+
+        }catch(FileNotFoundException e){
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
