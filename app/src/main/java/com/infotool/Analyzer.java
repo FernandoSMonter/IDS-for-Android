@@ -19,17 +19,44 @@ import java.util.Date;
 
 public class Analyzer{
 
+    /**
+     *
+     */
     Pcap pcap;
+
+    /**
+     *
+     */
     StringBuilder buffer;
+
+    /**
+     *
+     */
     Activity activity;
 
+    /**
+     *
+     */
     Date then;
 
+    /**
+     *
+     */
     final String pcap_path = "/sdcard/infpackets/analyze.pcap";
+
+    /**
+     *
+     */
     final String capture_path = "/sdcard/infpackets/capture.pcap";
 
+    /**
+     *
+     */
     boolean treat_string;
 
+    /**
+     *
+     */
     int opening_counter;
 
     public Analyzer(Activity activity){
@@ -140,7 +167,7 @@ public class Analyzer{
 
             //Gets tcpHeader bytes, always starting from the 35th byte
             //TCP size = 32 bytes
-           if( jbuffer.size() >= 33 ){
+           if( jbuffer.size() >= 66 ){
                tcpHeader = jbuffer.getByteArray(34, 32);
            }else
                continue;
@@ -159,7 +186,7 @@ public class Analyzer{
 
                     //IP size = 20 bytes
                     //byte [] ipAckHeader  =  jbuffer.getByteArray(14, 33);
-                    if( jbuffer.size() >= 33 ){
+                    if( jbuffer.size() >= 66 ){
                         tcpHeader = jbuffer.getByteArray(34, 32);
                     }else
                     continue;

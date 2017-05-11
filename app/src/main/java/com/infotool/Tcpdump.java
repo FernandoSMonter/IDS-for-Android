@@ -129,8 +129,7 @@ public class Tcpdump extends Thread{
 
 
                 if( capture.exists() && capture.length() > 0){
-                    this.closeShell();
-                    killAll("./data/local/tcpdump");
+                    this.stopCapturing();
                     makeCopy(capture, "analyze.pcap");
                     Log.e("Copia", copies + "");
 
@@ -238,22 +237,20 @@ public class Tcpdump extends Thread{
      * Stops a Tpcdump process which is currently running.
      */
     public void stopCapturing() {
-        if ( runCommand("exit\n") ){
+        try{
 
-            try {
-                outputStream.flush();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            this.closeShell();
+        }catch(NullPointerException e){
+            Log.e("Closed", "Already closed");
         }
 
-        // closeShell();
-
-        //su = null;
-        //refreshRate.removeCallbacks(refreshOutput);
-        //inputStream = null;
-        //outputStream = null;
+        killAll("./data/local/tcpdump");
         Log.e("Stop","Tcpdump stopped");
+    }
+
+    public void kill(){
+        this.connection = false;
+        this.stopCapturing();
     }
 
     /**

@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
      */
     public void stopTcpdump(View v){
         Toast.makeText(this, "Stopping tcpdump", Toast.LENGTH_SHORT).show();
-        tcpdump.stopCapturing();
+        tcpdump.kill();
         v.setVisibility(View.INVISIBLE);
         beginButton.setVisibility(View.VISIBLE);
     }
