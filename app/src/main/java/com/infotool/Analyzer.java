@@ -2,6 +2,7 @@ package com.infotool;
 
 import android.app.Activity;
 import android.os.Environment;
+import android.os.SystemClock;
 import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -59,7 +60,7 @@ public class Analyzer{
      */
     int opening_counter;
 
-    public Analyzer(Activity activity){
+    public Analyzer(){
         pcap   = null;
         buffer = new StringBuilder();
         opening_counter = 0;
@@ -67,7 +68,6 @@ public class Analyzer{
         //Time in milliseconds
         this.then = new Date();
 
-        this.activity = activity;
 
     }
 
@@ -102,18 +102,6 @@ public class Analyzer{
         });
     }
 
-    public void showToast(String message){
-        final String msg = message;
-        this.activity.runOnUiThread(new Runnable(){
-            @Override
-            public void run() {
-                Toast.makeText(activity, msg, Toast.LENGTH_LONG).show();
-            }
-        });
-    }
-
-    //androidpayload.stage.Meterpreter
-
     /**
      * Opens offline packet
      * @return
@@ -124,18 +112,17 @@ public class Analyzer{
         File analysis = new File(pcap_path);
 
         if(!isExternalStorageReadable()){
-            showToast("Sin permisos w/r");
+            Log.e("Perm","Sin permisos w/r");
         }
 
         if(analysis.exists() && analysis.length() > 0){
             pcap = Pcap.openOffline(pcap_path, buffer);
 
             if (pcap == null) {
-                showToast("Error: " + buffer);
+                Log.e("Error: ","" + buffer);
                 return false;
             }else {
-                Log.e("Abiertos", opening_counter + "");
-                showToast("Pcap abierto con éxito: " + this.opening_counter++);
+                Log.e("Abiertos", opening_counter++ + "");
                 return true;
             }
         }
@@ -146,6 +133,8 @@ public class Analyzer{
      * Runs main analysis
      */
     private void mainAnalysis(){
+        long init = System.currentTimeMillis();
+
         boolean analyzing = true;
 
         int packet_umbral = 30;
@@ -200,10 +189,8 @@ public class Analyzer{
                     if( threat_packet_counter >= 10){
                         Log.e("Pattern", "Ataque por Meterpreter detectado.");
                         Log.e("Paquetes", "Paquetes analizados: " + packet_counter);
-                        showNotification("Ataque por Meterpreter detectado.\nPaquetes analizados: " + packet_counter +
-                                         "\nIP y Puerto atacante" );
                         threatDetected = true;
-                        makeCopy(new File(pcap_path), "threat.pcap");
+                        makeCopy(new File(pcap_path), "threat" + System.currentTimeMillis() + ".pcap");
                         break;
                     }else if( packet_counter >= packet_umbral ){
                         break;
@@ -213,6 +200,8 @@ public class Analyzer{
             if(threatDetected)
                 break;
         }
+        long finish = System.currentTimeMillis();
+        Log.e("Analizado","Tiempo en analizar " + packet_counter + " paquetes: " + ( finish - init ) + "ms.");
     }
 
     /**

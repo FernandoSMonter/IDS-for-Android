@@ -1,6 +1,6 @@
 package com.infotool;
 
-import android.os.Environment;
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -35,17 +35,22 @@ public class MainActivity extends AppCompatActivity {
         //analyzer = new Analyzer(this);
     }
 
+
     /**
      *
      * @param v
      */
     public void startTcpdump(View v){
+        Toast.makeText(this,"Starting service", Toast.LENGTH_SHORT).show() ;
         v.setVisibility(View.INVISIBLE);
         stopButton.setVisibility(View.VISIBLE);
 
+        Intent intent = new Intent(this, MainService.class);
+        startService(intent);
+
         //Monitoring module thread
-        tcpdump = new Tcpdump(this);
-        tcpdump.start();
+        //tcpdump = new Tcpdump(this);
+        //tcpdump.start();
 
     }
 
@@ -54,10 +59,14 @@ public class MainActivity extends AppCompatActivity {
      * @param v
      */
     public void stopTcpdump(View v){
-        Toast.makeText(this, "Stopping tcpdump", Toast.LENGTH_SHORT).show();
-        tcpdump.kill();
+        Toast.makeText(this, "Stopping service", Toast.LENGTH_SHORT).show();
+        //tcpdump.kill();
         v.setVisibility(View.INVISIBLE);
         beginButton.setVisibility(View.VISIBLE);
+
+
+        Intent intent = new Intent(this, MainService.class);
+        stopService(intent);
     }
 
 }

@@ -25,16 +25,13 @@ import java.util.Date;
  * Created by Fernando Sánchez on 16/04/2017.
  */
 
-public class Tcpdump extends Thread{
+public class Tcpdump{
     /**
      * The path of arm tcpdump binary
      */
     final String binaryPath = "./data/local/tcpdump";
 
-    /**
-     * Main thread activity
-     */
-    Activity activity;
+    private  boolean running = false;
 
     /**
      * Su inputstream
@@ -46,73 +43,25 @@ public class Tcpdump extends Thread{
      */
     DataOutputStream outputStream;
 
-    /**
-     *
-     */
-    Handler refreshRate;
 
     /**
      * Su
      */
     Process su = null;
 
-    Date time;
 
-    boolean connection;
+    public Tcpdump() {
 
-    public Tcpdump(Activity activity) {
-       this.activity = activity;
 
-      /*  boolean analyzing = true;
-
-        while ( analyzing ){
-            //Haciendo analisis
-            if( new Date().getTime() > time.getTime() + 15000 ){
-                // stopCapturing();
-
-                capture = new File("/sdcard/infpackets/capture.pcap");
-
-                //The capture has packets inside
-                if( capture.exists() && capture.length() > 0 ){
-                    //Executed once
-
-                    Log.e("Time", "11 seconds elapsed, starting analysis module");
-                    Log.e("Capture", "Capture size: " + capture.length());
-
-                    //makeCopy(capture, "analyze.pcap");
-
-                    Log.e("Analyze","Analyze.pcap replaced");
-                    *//*if( runCommand("cp /sdcard/infpackets/capture.pcap /sdcard/infpackets/analyze.pcap\n") )
-                        Log.e("Copied","File copied");
-                    else
-                        Log.e("Copied", "Error copying file");*//*
-
-                    //new Analyzer(activity, new Date().getTime()).start();
-                    analyzing = false;
-                    //closeShell();
-
-                }else{
-                    Log.e("Packet","Capture size: " + capture.length());
-                    // startCapturing();
-                    //No packet captured, wait for next capture update time
-
-                }
-                startCapturing();
-                Log.e("Refresh", "Refreshing pcap");
-            }
-        }
-
-        Log.e("Analyzis","Finished");*/
     }
 
-    @Override
+   /* @Override
     public void run(){
         File capture;
         int copies = 0;
         boolean activated = false;
         this.connection = true;
         Analyzer analyze = new Analyzer(this.activity);
-        showToast("Empezando captura");
 
         //Opens the shell with root
         this.openSuShell();
@@ -154,7 +103,7 @@ public class Tcpdump extends Thread{
             }
 
         }
-    }
+    }*/
 
     public void openSuShell(){
         try{
@@ -177,41 +126,14 @@ public class Tcpdump extends Thread{
         this.outputStream = null;
     }
 
-    public void makeCopy(File file, String copy){
-        try{
-            FileInputStream in   = new FileInputStream(file);
-            FileOutputStream out = new FileOutputStream("/sdcard/infpackets/" + copy);
-
-            byte[] buffer = new byte[1024];
-            int read;
-
-            while( (read = in.read(buffer) ) != -1 ){
-                out.write(buffer, 0, read);
-            }
-
-            in.close();
-            in = null;
-
-            out.flush();
-            out.close();
-            out = null;
-
-        }catch(FileNotFoundException e){
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     /**
      * Runs TCPDump with root permission
      */
     public void startCapturing(){
         try{
-
-        this.time = new Date();
         outputStream.writeBytes(this.binaryPath + " tcp -w /sdcard/infpackets/capture.pcap\n");
-            Log.e("Capture","Capturando...");
+            this.running = true;
+            Log.e("Capture","Tcpdump iniciado");
     }catch(IOException e){
         System.out.println(e.getStackTrace());
     }
@@ -240,6 +162,8 @@ public class Tcpdump extends Thread{
         try{
 
             this.closeShell();
+            this.running = false;
+
         }catch(NullPointerException e){
             Log.e("Closed", "Already closed");
         }
@@ -248,10 +172,6 @@ public class Tcpdump extends Thread{
         Log.e("Stop","Tcpdump stopped");
     }
 
-    public void kill(){
-        this.connection = false;
-        this.stopCapturing();
-    }
 
     /**
      * Android killall pseudo-command (within rooted env)
@@ -276,14 +196,7 @@ public class Tcpdump extends Thread{
         }
     }
 
-    public void showToast(String message){
-        final String msg = message;
-        this.activity.runOnUiThread(new Runnable(){
-
-            @Override
-            public void run() {
-                Toast.makeText(activity, msg, Toast.LENGTH_SHORT).show();
-            }
-        });
+    public boolean isRunning(){
+        return this.running;
     }
 }
