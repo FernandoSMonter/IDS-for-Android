@@ -1,5 +1,6 @@
 package com.infotool;
 
+import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.Service;
@@ -13,6 +14,7 @@ import android.os.IBinder;
 import android.os.SystemClock;
 import android.support.annotation.IntDef;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.Toast;
@@ -29,6 +31,9 @@ public class MainService extends Service {
 
     BroadcastReceiver receiver;
 
+    BroadcastReceiver notifyReceiver;
+
+
     public MainService() {
     }
 
@@ -38,17 +43,24 @@ public class MainService extends Service {
 
         IntentFilter filter = new IntentFilter();
         filter.addAction("android.net.conn.CONNECTIVITY_CHANGE");
-        filter.addAction("android.net.wifi.WIFI_STATE_CHANGED");
+
+        this.setNotifyReceiver();
+        IntentFilter notifyFilter = new IntentFilter();
+        notifyFilter.addAction("com.infotool.NOTIFY_RESPONSE");
+
+
         registerReceiver(this.receiver, filter);
+        registerReceiver(this.notifyReceiver, notifyFilter);
     }
 
     @Override
     public void onDestroy() {
+        if( isMonitorRunning() )
         stopMonitor();
     }
 
     @Override
-    public int onStartCommand(Intent intent,int flags, int startId) {
+    public int onStartCommand(Intent intent, int flags, int startId) {
         startForeground(ID_FOREGROUND_START, buildForegroundNotification());
 
         return START_STICKY;
@@ -76,7 +88,7 @@ public class MainService extends Service {
     }
 
     private void startMonitor(){
-        monitor = new Monitor();
+        monitor = new Monitor(this);
         monitor.start();
 
         Log.e("Monitor","Starting Monitor module");
@@ -119,6 +131,18 @@ public class MainService extends Service {
                     }
                     Log.e("Conn",info.isConnected() + "");
                 }
+            }
+        };
+    }
+
+    public void setNotifyReceiver(){
+        this.notifyReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+               Intent intentActivity = new Intent(context, ResponseActivity.class);
+                intentActivity.putExtras(intent.getExtras());
+                intentActivity.setFlags(intentActivity.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intentActivity);
             }
         };
     }

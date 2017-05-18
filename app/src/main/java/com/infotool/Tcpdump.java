@@ -55,58 +55,9 @@ public class Tcpdump{
 
     }
 
-   /* @Override
-    public void run(){
-        File capture;
-        int copies = 0;
-        boolean activated = false;
-        this.connection = true;
-        Analyzer analyze = new Analyzer(this.activity);
-
-        //Opens the shell with root
-        this.openSuShell();
-
-        //Starts tcpdump
-        this.startCapturing();
-
-        while( this.connection ){
-
-            if( new Date().getTime() > time.getTime() + 10000){
-              //closeShell();
-
-                capture = new File("/sdcard/infpackets/capture.pcap");
-
-
-                if( capture.exists() && capture.length() > 0){
-                    this.stopCapturing();
-                    makeCopy(capture, "analyze.pcap");
-                    Log.e("Copia", copies + "");
-
-
-                    analyze.analyze();
-
-                    Log.e("Analyze","Analisis terminado");
-                    capture.delete();
-
-                    this.openSuShell();
-                    this.startCapturing();
-                    this.time = new Date();
-
-                    copies++;
-
-                }else{
-                    //makeCopy(capture, "analyze.pcap");
-                    Log.e("Captura", "Captura sin paquetes");
-                    this.time = new Date();
-                }
-
-            }
-
-        }
-    }*/
-
     public void openSuShell(){
         try{
+
             this.su = Runtime.getRuntime().exec("su");
             this.inputStream = new DataInputStream(su.getInputStream());
             this.outputStream = new DataOutputStream(su.getOutputStream());
@@ -131,7 +82,7 @@ public class Tcpdump{
      */
     public void startCapturing(){
         try{
-        outputStream.writeBytes(this.binaryPath + " tcp -w /sdcard/infpackets/capture.pcap\n");
+            outputStream.writeBytes(this.binaryPath + " tcp -w /sdcard/infpackets/capture.pcap\n");
             this.running = true;
             Log.e("Capture","Tcpdump iniciado");
     }catch(IOException e){

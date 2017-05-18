@@ -1,6 +1,8 @@
 package com.infotool;
 
-
+import android.app.Activity;
+import android.app.Service;
+import android.content.Intent;
 import android.os.SystemClock;
 import android.util.Log;
 
@@ -33,9 +35,13 @@ public class Monitor extends Thread {
 
     int copies;
 
+    Service s;
+
     private int refreshRate = 10000;
 
-    public Monitor(){
+    public Monitor(Service s){
+
+        this.s = s;
 
         clearFiles();
 
@@ -66,6 +72,7 @@ public class Monitor extends Thread {
 
     @Override
     public void run() {
+
         running = true;
 
         //Opens the shell with root
@@ -90,12 +97,11 @@ public class Monitor extends Thread {
             if( new Date().getTime() > time.getTime() + this.refreshRate ){
                 //closeShell();
 
+                tcpdump.stopCapturing();
+
                 capture = new File(this.path + this.capture_pcap);
 
-
                 if( capture.exists() && capture.length() > 0){
-
-                    tcpdump.stopCapturing();
 
                     makeCopy(capture, this.analyze_pcap);
                     Log.e("Copia", copies + "");
@@ -103,6 +109,15 @@ public class Monitor extends Thread {
 
                     analyzer.analyze();
                     Log.e("Analyze","Analisis terminado");
+
+                    if( analyzer.isThreatDetected() ){
+
+                        Intent intent = new Intent("com.infotool.NOTIFY_RESPONSE");
+                        intent.putExtra("ip", analyzer.attackerIP);
+                        intent.putExtra("port", analyzer.attackerPort);
+                        s.sendBroadcast(intent);
+
+                    }
 
                     capture.delete();
 
@@ -158,5 +173,7 @@ public class Monitor extends Thread {
             e.printStackTrace();
         }
     }
+
+
 
 }

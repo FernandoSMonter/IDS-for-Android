@@ -10,12 +10,14 @@ import org.jnetpcap.Pcap;
 import org.jnetpcap.PcapHeader;
 import org.jnetpcap.nio.JBuffer;
 import org.jnetpcap.nio.JMemory;
+import org.jnetpcap.packet.format.FormatUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Date;
 
 public class Analyzer{
@@ -55,10 +57,18 @@ public class Analyzer{
      */
     boolean treat_string;
 
+    boolean threatDetected;
+
     /**
      *
      */
     int opening_counter;
+
+    public String attackerSYNIP;
+    public String attackerSYNPort;
+
+    public String attackerIP;
+    public String attackerPort;
 
     public Analyzer(){
         pcap   = null;
@@ -67,21 +77,22 @@ public class Analyzer{
 
         //Time in milliseconds
         this.then = new Date();
-
-
     }
 
    public void analyze(){
-        File analyze = new File(pcap_path);
+       File analyze = new File(pcap_path);
 
        if( this.openPcapFile() ){
                this.mainAnalysis();
-               analyze.delete();
+                analyze.delete();
        }else {
            Log.e("Error","No file, monitor");
        }
    }
 
+   public boolean isThreatDetected(){
+       return this.threatDetected;
+   }
     /* Checks if external storage is available to at least read */
     public boolean isExternalStorageReadable() {
         String state = Environment.getExternalStorageState();
@@ -143,8 +154,8 @@ public class Analyzer{
         int packet_counter = 0;
 
         byte []tcpHeader;
-
-        boolean threatDetected = false;
+        byte [] ipHeader;
+        threatDetected = false;
 
         PcapHeader pcapHeader = new PcapHeader();
 
@@ -161,35 +172,54 @@ public class Analyzer{
            }else
                continue;
 
-            //IP size = 20 bytes
-            //byte [] ipHeader  =  jbuffer.getByteArray(15, 20);
+           if( jbuffer.size() >= 33 ){
+               ipHeader  =  jbuffer.getByteArray(14, 20);
+               attackerIP   = getSourceIP(ipHeader);
+               attackerPort = getSourcePort(tcpHeader);
+           }else
+               continue;
 
             //Find the SYN-ACK packet
             if( flagsSynAck(tcpHeader) ){
                 //checkOptionsField(tcpHeader);
+                //Get possible attacker Socket
+                if( jbuffer.size() >= 33 ){
+                    ipHeader  =  jbuffer.getByteArray(14, 20);
+                    attackerSYNIP   = getSourceIP(ipHeader);
+                    attackerSYNPort = getSourcePort(tcpHeader);
+                }else
+                    continue;
 
                 //Starts 2nd phase
                 //Only checks tcps with ACK, looks for pattern
                 while ( pcap.nextEx(pcapHeader, jbuffer) == Pcap.NEXT_EX_OK ){
                     Log.e("Paquete ", "" + (++packet_counter));
 
-                    //IP size = 20 bytes
-                    //byte [] ipAckHeader  =  jbuffer.getByteArray(14, 33);
                     if( jbuffer.size() >= 66 ){
                         tcpHeader = jbuffer.getByteArray(34, 32);
                     }else
-                    continue;
+                        continue;
 
                     if( flagsPshAck(tcpHeader) && checkHeaderLength(1514, pcapHeader)){
                         //getIP(ipAckHeader);
                         findString(jbuffer);        //Looks for suspicious strings in packet
                         threat_packet_counter++;    //Counts strange packet
+
+                        //IP size = 20 bytes
+                        if( jbuffer.size() >= 33 ){
+                            ipHeader  =  jbuffer.getByteArray(14, 20);
+                            attackerIP   = getSourceIP(ipHeader);
+                            attackerPort = getSourcePort(tcpHeader);
+                        }else
+                            continue;
                     }
 
                     if( threat_packet_counter >= 10){
                         Log.e("Pattern", "Ataque por Meterpreter detectado.");
                         Log.e("Paquetes", "Paquetes analizados: " + packet_counter);
-                        threatDetected = true;
+                        Log.e("Socket", "En SYN/ACK " + attackerSYNIP + ":" + attackerSYNPort);
+                        Log.e("Attack", "En ataque " + attackerIP + ":" + attackerPort);
+                        this.threatDetected = true;
                         makeCopy(new File(pcap_path), "threat" + System.currentTimeMillis() + ".pcap");
                         break;
                     }else if( packet_counter >= packet_umbral ){
@@ -278,9 +308,15 @@ public class Analyzer{
 
     private void getIP(byte[] ipHeader){
         String src_ip, dst_ip;
+        Log.e("IP", "Source: " + (ipHeader[12] & 0xFF) + "." + (ipHeader[13] & 0xFF) + "." + (ipHeader[14] & 0xFF) + "." + (ipHeader[15] & 0xFF));
+    }
 
-        Log.e("IP", "Source: " + ipHeader[11]);
-        Log.e("IP", "Destination: " + ipHeader[15] + "." + ipHeader[16] + "." + ipHeader[17] + "." + ipHeader[18]);
+    private String getSourceIP(byte [] ipHeader){
+        return (ipHeader[12] & 0xFF) + "." + (ipHeader[13] & 0xFF) + "." + (ipHeader[14] & 0xFF) + "." + (ipHeader[15] & 0xFF);
+    }
+
+    private String getSourcePort(byte [] tcpHeader){
+        return (tcpHeader[0] & 0xFF) + (tcpHeader[1] & 0xFF) + "";
     }
 
     public void makeCopy(File file, String copy){

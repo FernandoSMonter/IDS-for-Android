@@ -1,6 +1,7 @@
 package com.infotool;
 
 import android.content.Intent;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -13,7 +14,6 @@ public class MainActivity extends AppCompatActivity {
     /**
      * Tcpdump thread
      */
-    Capturer capturer;
     Tcpdump tcpdump;
     Analyzer analyzer;
     Diagnostic diagnostic;
@@ -69,5 +69,15 @@ public class MainActivity extends AppCompatActivity {
         stopService(intent);
     }
 
+
+    public void startResponse(View v){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        builder.setMessage("Alert")
+                .setTitle("Attacker");
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
 }
 
