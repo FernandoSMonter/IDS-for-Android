@@ -29,11 +29,8 @@ public class ResponseActivity extends AppCompatActivity {
     public void blockConnection(View v){
         IpTables iptables = new IpTables();
 
-        iptables.openSuShell();
 
         iptables.blockIp( this.information.getString("ip") );
-
-        iptables.closeShell();
 
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);

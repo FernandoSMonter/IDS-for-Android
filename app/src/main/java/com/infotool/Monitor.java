@@ -103,12 +103,9 @@ public class Monitor extends Thread {
 
                 if( capture.exists() && capture.length() > 0){
 
-                    makeCopy(capture, this.analyze_pcap);
-                    Log.e("Copia", copies + "");
-
-
+                    makeCopy(capture, "analyze.pcap");
                     analyzer.analyze();
-                    Log.e("Analyze","Analisis terminado");
+                    Log.e("Analyze","Análisis terminado");
 
                     if( analyzer.isThreatDetected() ){
 
@@ -132,6 +129,8 @@ public class Monitor extends Thread {
                 }else{
                     //makeCopy(capture, "analyze.pcap");
                     Log.e("Captura", "Captura sin paquetes");
+                    tcpdump.openSuShell();
+                    tcpdump.startCapturing();
                     this.time = new Date();
                 }
 
