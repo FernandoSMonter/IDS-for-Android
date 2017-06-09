@@ -1,3 +1,7 @@
 <resources>
-    <string name="app_name">IDSecTool</string>
+    <string name="app_name">WiFiSec Tool</string>
+    <string name="starting_service">Iniciando servicio</string>
+    <string name="stopping_service">Deteniendo servicio</string>
+    <string name="service_notification_title">Red Wi-Fi Segura</string>
+    <string name="service_notification_content">Monitoreando red</string>
 </resources>

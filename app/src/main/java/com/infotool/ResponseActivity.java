@@ -1,34 +1,49 @@
 package com.infotool;
 
-import android.support.v7.app.AlertDialog;
+import android.content.Context;
+import android.content.Intent;
+import android.net.wifi.WifiManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.TextView;
 
-import org.w3c.dom.Text;
-
 public class ResponseActivity extends AppCompatActivity {
+
+    Bundle information;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_response);
 
-        TextView attackerIp   = (TextView) findViewById(R.id.attacker_ip);
-        TextView attackerPort = (TextView) findViewById(R.id.attacker_port);
+       // TextView attackerIp   = (TextView) findViewById(R.id.attacker_ip);
+        //TextView attackerPort = (TextView) findViewById(R.id.attacker_port);
 
-        Bundle information = getIntent().getExtras();
+        this.information = getIntent().getExtras();
 
-        attackerIp.setText(information.getString("ip"));
-        attackerPort.setText(information.getString("port"));
+        //attackerIp.setText(this.information.getString("ip"));
+        //attackerPort.setText(this.information.getString("port"));
     }
 
+    public void blockConnection(View v){
+        IpTables iptables = new IpTables();
 
-    public void blockConnection(){
+        iptables.openSuShell();
 
+        iptables.blockIp( this.information.getString("ip") );
+
+        iptables.closeShell();
+
+        Intent intent = new Intent(this, MainActivity.class);
+        startActivity(intent);
     }
 
-    public void killConnection(){
+    public void killConnection(View v){
+        WifiManager wifi = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
+        wifi.disconnect();
 
+        Intent intent = new Intent(this, MainActivity.class);
+        startActivity(intent);
     }
 }

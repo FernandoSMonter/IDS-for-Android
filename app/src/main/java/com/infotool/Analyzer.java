@@ -103,15 +103,6 @@ public class Analyzer{
         return false;
     }
 
-    public void showNotification(final String message){
-        this.activity.runOnUiThread(new Runnable(){
-            @Override
-            public void run() {
-                TextView notify = (TextView)activity.findViewById(R.id.notification);
-                notify.setText(message);
-            }
-        });
-    }
 
     /**
      * Opens offline packet
@@ -227,9 +218,9 @@ public class Analyzer{
                     }
                 }
             }
-            if(threatDetected)
-                break;
+           if(threatDetected)  break;
         }
+
         long finish = System.currentTimeMillis();
         Log.e("Analizado","Tiempo en analizar " + packet_counter + " paquetes: " + ( finish - init ) + "ms.");
     }
