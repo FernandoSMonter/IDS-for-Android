@@ -1,24 +1,12 @@
 package com.infotool;
 
-import android.app.Activity;
-import android.os.Handler;
-import android.provider.Settings;
-import android.util.Log;
-import android.widget.TextView;
-import android.widget.Toast;
 
+import android.util.Log;
 import java.io.BufferedReader;
-import java.io.DataInput;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.util.Date;
 
 
 /**

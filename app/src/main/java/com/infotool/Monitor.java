@@ -1,11 +1,9 @@
 package com.infotool;
 
-import android.app.Activity;
+
 import android.app.Service;
 import android.content.Intent;
-import android.os.SystemClock;
 import android.util.Log;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
