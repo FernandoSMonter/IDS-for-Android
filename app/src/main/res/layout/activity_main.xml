@@ -18,9 +18,10 @@
         android:orientation="horizontal"
         tools:layout_editor_absoluteY="70dp"
         tools:layout_editor_absoluteX="0dp"/>
+
     <RelativeLayout
-        android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_width="295dp"
+        android:layout_height="421dp"
         android:layout_marginBottom="68dp"
         android:layout_marginEnd="35dp"
         android:layout_marginLeft="35dp"
@@ -28,40 +29,26 @@
         android:layout_marginStart="35dp"
         android:layout_marginTop="68dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintHorizontal_bias="0.488"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0"
         tools:layout_constraintBottom_creator="1"
         tools:layout_constraintLeft_creator="1"
         tools:layout_constraintRight_creator="1"
         tools:layout_constraintTop_creator="1">
 
-        <ImageView
-            android:id="@+id/imageView"
-            android:layout_width="30dp"
-            android:layout_height="21dp"
-            android:layout_below="@+id/textView6"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="16dp"
-            app:srcCompat="@android:drawable/ic_secure"
-            tools:layout_constraintBottom_creator="1"
-            tools:layout_constraintRight_creator="1"
-            tools:layout_editor_absoluteX="299dp"
-            tools:layout_editor_absoluteY="244dp"/>
-
         <TextView
             android:id="@+id/textView6"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignEnd="@+id/stop_button"
             android:layout_alignParentTop="true"
-            android:layout_alignRight="@+id/stop_button"
+            android:layout_centerHorizontal="true"
+            android:fontFamily="monospace"
             android:text=" Wi-FiSec Tool"
             android:textAlignment="center"
-            android:textColor="@android:color/background_light"
-            android:textSize="24sp"
+            android:textColor="#ffff"
+            android:textSize="36sp"
             android:textStyle="bold"
             tools:layout_editor_absoluteX="90dp"
             tools:layout_editor_absoluteY="328dp"
@@ -71,41 +58,30 @@
             android:id="@+id/begin_button"
             android:layout_width="150dp"
             android:layout_height="150dp"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
             android:background="@drawable/button_round"
             android:elevation="24dp"
             android:onClick="startTcpdump"
             android:padding="15dp"
-            android:text="Iniciar Servicio"/>
+            android:text="Iniciar Servicio"
+            android:layout_marginBottom="15dp"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"/>
 
         <Button
             android:id="@+id/stop_button"
             android:layout_width="150dp"
             android:layout_height="150dp"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
             android:background="@drawable/button_round"
             android:elevation="24dp"
             android:onClick="stopTcpdump"
             android:padding="15dp"
             android:text="Detener Servicio"
-            android:visibility="invisible"/>
+            android:visibility="invisible"
+            android:layout_alignTop="@+id/begin_button"
+            android:layout_alignLeft="@+id/begin_button"
+            android:layout_alignStart="@+id/begin_button"/>
 
-        <Button
-            android:id="@+id/responseActivity"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignEnd="@+id/begin_button"
-            android:layout_alignRight="@+id/begin_button"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="16dp"
-            android:onClick="startResponse"
-            android:text="Response View "
-            app:layout_constraintLeft_toLeftOf="parent"
-            tools:layout_editor_absoluteY="456dp"/>
     </RelativeLayout>
-
 
 
 </android.support.constraint.ConstraintLayout>

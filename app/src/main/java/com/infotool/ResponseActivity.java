@@ -5,6 +5,7 @@ import android.net.wifi.WifiManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.TextView;
 
 public class ResponseActivity extends AppCompatActivity {
 
@@ -15,12 +16,12 @@ public class ResponseActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_response);
 
-       // TextView attackerIp   = (TextView) findViewById(R.id.attacker_ip);
+        TextView attackerIp   = (TextView) findViewById(R.id.attacker_ip);
         //TextView attackerPort = (TextView) findViewById(R.id.attacker_port);
 
         this.information = getIntent().getExtras();
 
-        //attackerIp.setText(this.information.getString("ip"));
+        attackerIp.setText(this.information.getString("ip"));
         //attackerPort.setText(this.information.getString("port"));
     }
 

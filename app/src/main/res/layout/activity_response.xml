@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.infotool.ResponseActivity"
-    android:background="@color/colorPrimary">
+    android:background="@color/warningActivity">
 
 
     <TextView
@@ -62,5 +62,14 @@
         android:text="Bloquear conexión"
         tools:layout_editor_absoluteX="98dp"
         tools:layout_editor_absoluteY="215dp"/>
+
+    <TextView
+        android:id="@+id/attacker_ip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/textView4"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="47dp"
+        />
 
 </RelativeLayout>
